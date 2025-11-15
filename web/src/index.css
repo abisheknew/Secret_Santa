@@ -6,3 +6,8 @@
 body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg),#fff);color:#0f172a}
 h1{font-weight:700}
 .container{padding:18px}
+/* simple button styles for web UI */
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;border-radius:8px;padding:.4rem .75rem;cursor:pointer;border:1px solid rgba(0,0,0,0.06);background:#f3f4f6}
+.btn-primary{background:linear-gradient(90deg,#6366f1,#7c3aed);color:white;border:none}
+.btn-outline{background:transparent;border:1px solid #c7d2fe;color:#4f46e5;padding:.45rem .8rem;border-radius:8px}
+.btn-ghost{background:transparent;border:none;color:var(--muted)}

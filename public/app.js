@@ -11,8 +11,10 @@ function App(){
   const [adminName, setAdminName] = useState('');
   const [message, setMessage] = useState('');
   const [notifications, setNotifications] = useState([]);
+  const [me, setMe] = useState(null);
 
   useEffect(()=>{ fetch('/api/notifications').then(r=>r.json()).then(j=>setNotifications(j.notifications||[])); }, []);
+  useEffect(()=>{ api('/api/me').then(j=>{ if (j && j.authenticated) setMe(j.user); }); }, []);
 
   async function createGroup(){
     const res = await api('/api/create_group',{method:'POST',body: JSON.stringify({ admin_name: adminName, admin_email: adminEmail, name: groupId })});
@@ -45,7 +47,16 @@ function App(){
             <div className="text-sm muted">PWA MVP — quick prototype</div>
           </div>
         </div>
-        <div className="text-sm muted">v0.1</div>
+        <div className="text-sm muted">
+          {me ? (
+            <div className="flex items-center gap-3">
+              <div className="text-sm">Signed in as <strong>{me.name || me.email}</strong></div>
+              <button className="btn btn-ghost" onClick={async ()=>{ await api('/auth/logout',{method:'POST'}); setMe(null); window.location.href = '/'; }}>Sign out</button>
+            </div>
+          ) : (
+            <div className="text-sm muted">v0.1</div>
+          )}
+        </div>
       </header>
 
       <section className="mt-6 grid grid-cols-2 gap-4">
@@ -108,7 +119,10 @@ function SignInBox(){
     <div className="mt-4">
       <input className="w-full p-2 border rounded" placeholder="Your email" value={email} onChange={e=>setEmail(e.target.value)} />
       <input className="w-full p-2 border rounded mt-2" placeholder="(optional) group id" value={groupId} onChange={e=>setGroupId(e.target.value)} />
-      <button className="mt-2 btn btn-primary" onClick={request}>Sign-in (magic link)</button>
+      <div className="mt-2 flex gap-2">
+        <button className="btn btn-primary" onClick={request}>Sign-in (magic link)</button>
+        <a href="/auth/google" className="btn btn-outline" title="Sign in with Google">Sign in with Google</a>
+      </div>
       <div className="text-xs mt-2 muted">{status}</div>
     </div>
   );

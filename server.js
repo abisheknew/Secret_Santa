@@ -55,6 +55,32 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
+// Expose a small status endpoint so frontend or dev can check if Google OAuth is enabled
+app.get('/api/auth/status', (req, res) => {
+  res.json({ google: !!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) });
+});
+
+console.log(`Google OAuth configured: ${!!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET)}`);
+
+// Return current authenticated user (by session)
+app.get('/api/me', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_id) return res.json({ authenticated: false });
+    const u = await getAsync(`SELECT id,name,email,avatar_url FROM users WHERE id = ?`, [req.session.user_id]);
+    if (!u) return res.json({ authenticated: false });
+    res.json({ authenticated: true, user: u });
+  } catch (e) { console.error(e); res.status(500).json({ authenticated: false, error: e.message }); }
+});
+
+// Logout endpoint
+app.post('/auth/logout', (req, res) => {
+  try {
+    if (req.session) {
+      req.session.destroy(err => { if (err) console.error('session destroy', err); res.json({ success: true }); });
+    } else res.json({ success: true });
+  } catch (e) { console.error(e); res.status(500).json({ success: false }); }
+});
+
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
