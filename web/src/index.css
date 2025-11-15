@@ -1,0 +1,8 @@
+:root{
+	--indigo:#6d28d9;
+	--bg: #f8fafc;
+	--muted:#64748b;
+}
+body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg),#fff);color:#0f172a}
+h1{font-weight:700}
+.container{padding:18px}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Secret Santa</title>
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <div id="root" class="min-h-screen p-6"></div>
+
+    <script>
+      // show a small loading/fallback message while the app loads or if scripts fail
+      try { document.getElementById('root').textContent = 'Loading Secret Santa app...'; } catch(e) {}
+    </script>
+
+    <script type="text/babel" data-type="module" src="/app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      }
+    </script>
+  </body>
+</html>

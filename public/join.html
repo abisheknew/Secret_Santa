@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Join Secret Santa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 p-6">
+    <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+      <h1 class="text-xl font-semibold">Join Secret Santa</h1>
+      <p class="text-sm text-gray-600">If you came from an invite link, enter your name and email to join the group.</p>
+      <form id="joinForm" class="mt-4">
+        <input id="token" type="hidden" />
+        <div><input id="group_id" class="w-full p-2 border rounded" placeholder="Group ID" /></div>
+        <div class="mt-2"><input id="name" class="w-full p-2 border rounded" placeholder="Your name" /></div>
+        <div class="mt-2"><input id="email" class="w-full p-2 border rounded" placeholder="Your email" /></div>
+        <div class="mt-4"><button class="bg-blue-600 text-white px-3 py-2 rounded">Join</button></div>
+      </form>
+      <pre id="result" class="mt-3 bg-gray-50 p-2 rounded"></pre>
+    </div>
+    <script>
+      const qs = new URLSearchParams(location.search);
+      const token = qs.get('token');
+      const gid = qs.get('group_id');
+      if (token) document.getElementById('token').value = token;
+      if (gid) document.getElementById('group_id').value = gid;
+      document.getElementById('joinForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const token = document.getElementById('token').value;
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        if (token) {
+          const res = await fetch('/api/join_with_token', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token, name, email }) });
+          const j = await res.json(); document.getElementById('result').textContent = JSON.stringify(j, null, 2);
+        } else {
+          const group_id = document.getElementById('group_id').value;
+          const res = await fetch('/api/join', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ group_id, name, email }) });
+          const j = await res.json(); document.getElementById('result').textContent = JSON.stringify(j, null, 2);
+        }
+      };
+    </script>
+  </body>
+</html>

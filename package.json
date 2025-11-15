@@ -1,0 +1,25 @@
+{
+  "name": "secret-santa",
+  "version": "0.1.0",
+  "description": "Secret Santa app - Express + SQLite + React (CDN) + Tailwind (CDN)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "web:install": "cd web && npm install",
+    "web:build": "cd web && npm run build"
+  },
+  "dependencies": {
+  "@sendgrid/mail": "^7.7.0",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+  "express-session": "^1.17.3",
+  "connect-sqlite3": "^0.9.0",
+  "passport": "^0.6.0",
+  "passport-google-oauth20": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.0"
+  }
+}
