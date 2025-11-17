@@ -148,15 +148,56 @@ async function migrate() {
 }
 
 async function sendEmail(email, subject, body, html) {
+  // Prefer SendGrid if configured
   if (SENDGRID_KEY) {
     const msg = { to: email, from: SENDER_EMAIL, subject, text: body, html: html };
     try { await sgMail.send(msg); return true; } catch (e) { console.error('SendGrid error', e); }
   }
+
+  // Next prefer Brevo / Sendinblue if configured
+  const BREVO_KEY = process.env.BREVO_API_KEY || '';
+  const BREVO_SENDER = process.env.SENDER_EMAIL || SENDER_EMAIL;
+  if (BREVO_KEY) {
+    try {
+      await sendViaBrevo(email, subject, body, html, BREVO_KEY, BREVO_SENDER);
+      return true;
+    } catch (e) {
+      console.error('Brevo send error', e);
+    }
+  }
+
   // fallback: store notification and log
   await runAsync(`INSERT INTO notifications (id,email,subject,body,created_at) VALUES (?,?,?,?,?)`, [uuidv4(), email, subject, body || html || '', now()]);
   console.log('Simulated email ->', email, subject, body || html || '');
   return false;
 }
+
+// Brevo (Sendinblue) send via HTTP API
+async function sendViaBrevo(to, subject, text, html, apiKey, sender) {
+  if (!apiKey) throw new Error('Brevo API key missing');
+  const url = 'https://api.sendinblue.com/v3/smtp/email';
+  const payload = {
+    sender: { name: 'Secret Santa', email: sender },
+    to: [{ email: to }],
+    subject: subject,
+    htmlContent: html || (text ? `<pre>${escapeHtml(text)}</pre>` : ''),
+    textContent: text || ''
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': apiKey },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const bodyText = await res.text();
+    const err = new Error(`Brevo send failed: ${res.status} ${res.statusText} ${bodyText}`);
+    err.status = res.status;
+    throw err;
+  }
+  return res.json();
+}
+
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
 
 // Utility: compute assignments (random shuffle with retries)
 async function computeAssignmentsSQL(group_id, maxRetries = 2000) {
