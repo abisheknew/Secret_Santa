@@ -3,7 +3,7 @@ A minimal Secret Santa web app (MVP) implemented as a single Node.js server with
 
 Features implemented in this scaffold:
 - Create group (admin)
-- Invite people by email (simulated: notifications stored in data.json and printed to console)
+- Invite people by email (simulated: notifications stored in dataz.json and printed to console)
 - Join group
 - Add exclusions (mutual optional)
 - Wishlists per user (JSON array of items)

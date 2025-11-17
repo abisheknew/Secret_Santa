@@ -53,7 +53,9 @@ app.use(passport.initialize());
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+// Normalize BASE_URL: remove trailing slashes to avoid redirect URI mismatches
+const rawBase = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = String(rawBase).replace(/\/+$/, '');
 
 // Expose a small status endpoint so frontend or dev can check if Google OAuth is enabled
 app.get('/api/auth/status', (req, res) => {
@@ -111,6 +113,27 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     } catch (e) { return res.redirect('/'); }
   });
 }
+
+console.log(`Google OAuth callback URL will be: ${BASE_URL}/auth/google/callback`);
+
+// Debug endpoint: shows whether Google OAuth is enabled and the exact auth URL (no secrets)
+app.get('/auth/google-debug', (req, res) => {
+  const enabled = !!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
+  const callback = `${BASE_URL}/auth/google/callback`;
+  let authUrl = null;
+  if (enabled) {
+    const params = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: callback,
+      response_type: 'code',
+      scope: 'openid email profile',
+      access_type: 'offline',
+      prompt: 'consent'
+    });
+    authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  }
+  res.json({ enabled, clientId: GOOGLE_CLIENT_ID || null, callback, authUrl });
+});
 
 // Ensure DB file
 const db = new sqlite3.Database(DB_FILE);
